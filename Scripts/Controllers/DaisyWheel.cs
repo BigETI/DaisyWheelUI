@@ -12,7 +12,7 @@ namespace DaisyWheelUI.Controllers
     /// Daisy wheel UI controller script class
     /// </summary>
     [ExecuteInEditMode]
-    public class DaisyWheel : MonoBehaviour
+    public class DaisyWheel : Selectable
     {
         /// <summary>
         /// Are items clockwise
@@ -111,6 +111,27 @@ namespace DaisyWheelUI.Controllers
         private int selectedIndex = -1;
 
         /// <summary>
+        /// Item graphics
+        /// </summary>
+        private List<Graphic> itemGraphics = new List<Graphic>();
+
+        /// <summary>
+        /// Target graphic
+        /// </summary>
+        private Graphic TargetGraphic
+        {
+            get => targetGraphic;
+            set
+            {
+                if (targetGraphic != value)
+                {
+                    DoStateTransition((IsActive() && !IsInteractable()) ? SelectionState.Disabled : SelectionState.Normal, false);
+                    targetGraphic = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Loop value
         /// </summary>
         /// <param name="value">Value</param>
@@ -152,7 +173,6 @@ namespace DaisyWheelUI.Controllers
                 if ((image.type == Image.Type.Filled) && (image.fillMethod == Image.FillMethod.Radial360))
                 {
                     ret = itemRotation * (image.fillClockwise ? 0.5f : -0.5f);
-                    //ret = itemRotation * 0.5f;
                     switch (image.fillOrigin)
                     {
                         case 0: // Bottom
@@ -179,6 +199,7 @@ namespace DaisyWheelUI.Controllers
         {
             numItems = 0U;
             itemRotation = 360.0f;
+            itemGraphics.Clear();
             if (contentRectTransform != null)
             {
                 List<RectTransform> child_rect_transforms = new List<RectTransform>();
@@ -208,6 +229,7 @@ namespace DaisyWheelUI.Controllers
                                     {
                                         image.fillAmount = fill_amount;
                                     }
+                                    itemGraphics.Add(image);
                                 }
                                 float item_rotation_offset_rad = (item_rotation_offset * Mathf.PI) / 180.0f;
                                 Vector2 up = new Vector2(Mathf.Sin(item_rotation_offset_rad), Mathf.Cos(item_rotation_offset_rad));
@@ -260,8 +282,9 @@ namespace DaisyWheelUI.Controllers
         /// <summary>
         /// Start
         /// </summary>
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             Canvas canvas = GetComponentInParent<Canvas>();
             if (canvas != null)
             {
@@ -279,74 +302,77 @@ namespace DaisyWheelUI.Controllers
             ResizeItems();
             if ((numItems > 0U) && (canvasRectTransform != null) && (contentRectTransform != null))
             {
-                Vector2 canvas_size = canvasRectTransform.rect.size;
-                Vector2 content_size = contentRectTransform.rect.size;
-                if ((canvas_size.sqrMagnitude > float.Epsilon) && (content_size.sqrMagnitude > float.Epsilon))
+                if ((currentSelectionState == SelectionState.Pressed) || (currentSelectionState == SelectionState.Selected))
                 {
-                    int touch_count = 0;
-                    Vector2 selection_direction = Vector2.zero;
-                    if (Input.touchCount > 0)
+                    Vector2 canvas_size = canvasRectTransform.rect.size;
+                    Vector2 content_size = contentRectTransform.rect.size;
+                    if ((canvas_size.sqrMagnitude > float.Epsilon) && (content_size.sqrMagnitude > float.Epsilon))
                     {
-                        Vector2 touch_positions_added = Vector2.zero;
-                        for (int i = 0; i < Input.touchCount; i++)
+                        int touch_count = 0;
+                        Vector2 selection_direction = Vector2.zero;
+                        if (Input.touchCount > 0)
                         {
-                            Touch touch = Input.GetTouch(i);
-                            if ((touch.phase != TouchPhase.Canceled) || (touch.phase != TouchPhase.Ended))
+                            Vector2 touch_positions_added = Vector2.zero;
+                            for (int i = 0; i < Input.touchCount; i++)
                             {
-                                touch_positions_added += touch.position;
-                                ++touch_count;
+                                Touch touch = Input.GetTouch(i);
+                                if ((touch.phase != TouchPhase.Canceled) || (touch.phase != TouchPhase.Ended))
+                                {
+                                    touch_positions_added += touch.position;
+                                    ++touch_count;
+                                }
+                                if (touch.phase == TouchPhase.Ended)
+                                {
+                                    touch_selected = true;
+                                }
                             }
-                            if (touch.phase == TouchPhase.Ended)
+                            if (touch_count > 0U)
                             {
-                                touch_selected = true;
+                                Vector2 content_position;
+                                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, touch_positions_added / touch_count, null, out selection_direction);
+                                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, new Vector2(contentRectTransform.position.x, contentRectTransform.position.y), null, out content_position);
+                                selection_direction = new Vector2((selection_direction.x - content_position.x) / content_size.x, (selection_direction.y - content_position.y) / content_size.y);
                             }
                         }
-                        if (touch_count > 0U)
+                        if (touch_count <= 0)
                         {
-                            Vector2 content_position;
-                            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, touch_positions_added / touch_count, null, out selection_direction);
-                            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, new Vector2(contentRectTransform.position.x, contentRectTransform.position.y), null, out content_position);
-                            selection_direction = new Vector2((selection_direction.x - content_position.x) / content_size.x, (selection_direction.y - content_position.y) / content_size.y);
+                            float horizontal = Input.GetAxisRaw("Horizontal");
+                            float vertical = Input.GetAxisRaw("Vertical");
+                            if (Input.mousePresent && (((horizontal * horizontal) + (vertical * vertical)) <= (inputDeadZone * inputDeadZone)))
+                            {
+                                Vector2 content_position;
+                                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, Input.mousePosition, null, out selection_direction);
+                                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, new Vector2(contentRectTransform.position.x, contentRectTransform.position.y), null, out content_position);
+                                selection_direction = new Vector2((selection_direction.x - content_position.x) / content_size.x, (selection_direction.y - content_position.y) / content_size.y);
+                            }
+                            else
+                            {
+                                selection_direction = new Vector2(horizontal, vertical);
+                            }
                         }
-                    }
-                    if (touch_count <= 0)
-                    {
-                        float horizontal = Input.GetAxisRaw("Horizontal");
-                        float vertical = Input.GetAxisRaw("Vertical");
-                        if (Input.mousePresent && (((horizontal * horizontal) + (vertical * vertical)) <= (inputDeadZone * inputDeadZone)))
+                        if (selection_direction.sqrMagnitude > (inputDeadZone * inputDeadZone))
                         {
-                            Vector2 content_position;
-                            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, Input.mousePosition, null, out selection_direction);
-                            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, new Vector2(contentRectTransform.position.x, contentRectTransform.position.y), null, out content_position);
-                            selection_direction = new Vector2((selection_direction.x - content_position.x) / content_size.x, (selection_direction.y - content_position.y) / content_size.y);
-                        }
-                        else
-                        {
-                            selection_direction = new Vector2(horizontal, vertical);
-                        }
-                    }
-                    if (selection_direction.sqrMagnitude > (inputDeadZone * inputDeadZone))
-                    {
-                        selection_direction.Normalize();
-                        not_selected = false;
-                        float cursor_rotation_offset = GetImageRotationOffset(cursorImage);
-                        float selection_angle = Loop(Vector2.SignedAngle(Vector2.up, selection_direction) + cursor_rotation_offset, 0.0f, 360.0f);
-                        cursorRectTransform.localRotation = Quaternion.Euler(0.0f, 0.0f, selection_angle - (cursor_rotation_offset * itemSpacing));
-                        int selection_index = 0;
-                        while (selection_angle >= itemRotation)
-                        {
-                            selection_angle -= itemRotation;
-                            ++selection_index;
-                        }
-                        if (clockwise)
-                        {
-                            selection_index = (int)((numItems - selection_index) % numItems);
-                        }
-                        if (selection_index != selectedIndex)
-                        {
-                            selectedIndex = selection_index;
-                            onDeselect?.Invoke();
-                            onSelect?.Invoke();
+                            selection_direction.Normalize();
+                            not_selected = false;
+                            float cursor_rotation_offset = GetImageRotationOffset(cursorImage);
+                            float selection_angle = Loop(Vector2.SignedAngle(Vector2.up, selection_direction) + cursor_rotation_offset, 0.0f, 360.0f);
+                            cursorRectTransform.localRotation = Quaternion.Euler(0.0f, 0.0f, selection_angle - (cursor_rotation_offset * itemSpacing));
+                            int selection_index = 0;
+                            while (selection_angle >= itemRotation)
+                            {
+                                selection_angle -= itemRotation;
+                                ++selection_index;
+                            }
+                            if (clockwise)
+                            {
+                                selection_index = (int)((numItems - selection_index) % numItems);
+                            }
+                            if (selection_index != selectedIndex)
+                            {
+                                selectedIndex = selection_index;
+                                onDeselect?.Invoke();
+                                onSelect?.Invoke();
+                            }
                         }
                     }
                 }
@@ -363,6 +389,7 @@ namespace DaisyWheelUI.Controllers
             {
                 onClick?.Invoke();
             }
+            TargetGraphic = ((selectedIndex < 0) || (selectedIndex >= itemGraphics.Count)) ? null : itemGraphics[selectedIndex];
         }
     }
 }
