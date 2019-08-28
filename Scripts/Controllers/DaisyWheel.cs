@@ -24,13 +24,13 @@ namespace DaisyWheelUI.Controllers
         /// Item spacing
         /// </summary>
         [SerializeField, Range(0.0f, 1.0f)]
-        private float itemSpacing;
+        private float itemSpacing = default;
 
         /// <summary>
         /// Item content height
         /// </summary>
         [SerializeField]
-        private float itemContentHeight;
+        private float itemContentHeight = default;
 
         /// <summary>
         /// Item content rotation mode
@@ -48,37 +48,37 @@ namespace DaisyWheelUI.Controllers
         /// Cursor rectangle transform
         /// </summary>
         [SerializeField]
-        private RectTransform cursorRectTransform;
+        private RectTransform cursorRectTransform = default;
 
         /// <summary>
         /// Content rectangle transform
         /// </summary>
         [SerializeField]
-        private RectTransform contentRectTransform;
+        private RectTransform contentRectTransform = default;
 
         /// <summary>
         /// Pivot rectangle transform
         /// </summary>
         [SerializeField]
-        private RectTransform pivotRectTransform;
+        private RectTransform pivotRectTransform = default;
 
         /// <summary>
         /// On select event
         /// </summary>
         [SerializeField]
-        private UnityEvent onSelect;
+        private UnityEvent onSelect = default;
 
         /// <summary>
         /// On deselect event
         /// </summary>
         [SerializeField]
-        private UnityEvent onDeselect;
+        private UnityEvent onDeselect = default;
 
         /// <summary>
         /// On click event
         /// </summary>
         [SerializeField]
-        private UnityEvent onClick;
+        private UnityEvent onClick = default;
 
         /// <summary>
         /// Tau

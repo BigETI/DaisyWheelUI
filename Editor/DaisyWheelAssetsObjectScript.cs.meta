@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6461bc0b55845844283f549b0dd14ab3
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - canvasAsset: {fileID: 6509719999306287040, guid: f40276ee5d6c0764ab914602a6c0b65b,
+      type: 3}
+  - eventSystemAsset: {fileID: 8984913999818831866, guid: 3cba05bfd32f80b4caf4db00b6ff1f37,
+      type: 3}
+  - daisyWheelAsset: {fileID: 7079095306196946906, guid: e45ff6bcb026844418251bd0aed02185,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

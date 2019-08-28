@@ -14,19 +14,19 @@ namespace DaisyWheelUI.Editor
         /// Canvas asset
         /// </summary>
         [SerializeField]
-        private GameObject canvasAsset;
+        private GameObject canvasAsset = default;
 
         /// <summary>
         /// Event system asset
         /// </summary>
         [SerializeField]
-        private GameObject eventSystemAsset;
+        private GameObject eventSystemAsset = default;
 
         /// <summary>
         /// Daisy wheel asset
         /// </summary>
         [SerializeField]
-        private GameObject daisyWheelAsset;
+        private GameObject daisyWheelAsset = default;
 
         /// <summary>
         /// Canvas asset
