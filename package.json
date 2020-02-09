@@ -1,0 +1,19 @@
+{
+    "name": "com.bigeti.daisy-wheel-ui",
+    "version": "1.0.0",
+    "displayName": "Daisy Wheel UI",
+    "description": "This package contains a Daisy Wheel UI for Unity.",
+    "dependencies": {
+        "unity.com.ugui": "1.1.0"
+    },
+    "keywords": [
+        "daisy",
+        "wheel",
+        "daisywheel"
+    ],
+    "author": {
+        "name": "Ethem Kurt",
+        "email": "bigeti.ethem@gmail.com",
+        "url": "https://bigeti.de/"
+    }
+}
