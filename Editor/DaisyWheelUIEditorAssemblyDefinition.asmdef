@@ -1,0 +1,15 @@
+{
+    "name": "DaisyWheelUIEditor",
+    "references": [
+        "GUID:8467edde1f7dd404db51eb550aa21248"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
