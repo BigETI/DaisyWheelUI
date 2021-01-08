@@ -1,4 +1,5 @@
 ﻿using DaisyWheelUI.Controllers;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,12 +15,16 @@ namespace DaisyWheelUI.Editor
     public class DaisyWheelEditorScript : UnityEditor.Editor
     {
         /// <summary>
-        /// Create daisy wheel
+        /// Creates a new daisy wheel
         /// </summary>
-        [MenuItem("GameObject/UI/Daisy Wheel")]
-        public static void CreateDaisyWheel()
+        /// <param name="resourceName">Resource name</param>
+        private static void CreateDaisyWheel(string resourceName)
         {
-            DaisyWheelAssetsObjectScript assets = Resources.Load<DaisyWheelAssetsObjectScript>("DaisyWheelAssets");
+            if (resourceName == null)
+            {
+                throw new ArgumentNullException(nameof(resourceName));
+            }
+            DaisyWheelAssetsObjectScript assets = Resources.Load<DaisyWheelAssetsObjectScript>(resourceName);
             if (assets != null)
             {
                 RectTransform canvas_rect_transform = null;
@@ -53,10 +58,12 @@ namespace DaisyWheelUI.Editor
                             canvas_rect_transform = go.GetComponent<RectTransform>();
                             if (canvas_rect_transform != null)
                             {
+                                Undo.RegisterCreatedObjectUndo(go, "Canvas");
                                 go = Instantiate(assets.EventSystemAsset);
                                 if (go != null)
                                 {
                                     go.name = "EventSystem";
+                                    Undo.RegisterCreatedObjectUndo(go, "EventSystem");
                                 }
                                 else
                                 {
@@ -86,6 +93,7 @@ namespace DaisyWheelUI.Editor
                                 daisy_wheel_rect_transform.SetParent(canvas_rect_transform, true);
                                 daisy_wheel_rect_transform.anchoredPosition = Vector2.zero;
                                 daisy_wheel_rect_transform.localScale = Vector3.one;
+                                Undo.RegisterCreatedObjectUndo(daisy_wheel_game_object, "Daisy Wheel");
                             }
                             else
                             {
@@ -96,5 +104,23 @@ namespace DaisyWheelUI.Editor
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a new daisy wheel
+        /// </summary>
+#if ENABLE_INPUT_SYSTEM
+        [MenuItem("GameObject/UI/Daisy Wheel")]
+        public static void CreateDaisyWheel() => CreateDaisyWheel("DaisyWheelAssets");
+#endif
+
+        /// <summary>
+        /// Creates a new daisy wheel
+        /// </summary>
+#if ENABLE_INPUT_SYSTEM
+        [MenuItem("GameObject/UI/Daisy Wheel (legacy)")]
+#else
+        [MenuItem("GameObject/UI/Daisy Wheel")]
+#endif
+        public static void CreateLegacyDaisyWheel() => CreateDaisyWheel("LegacyDaisyWheelAssets");
     }
 }
